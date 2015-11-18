@@ -24,7 +24,8 @@ function! s:refreshView()
 endfu
 
 function! s:startDaemon(initialMD)
-    call s:system("instant-markdown-d &>/dev/null &", a:initialMD)
+    call system("cp /tmp/imd.out /tmp/imd.out.1")
+    call s:system("instant-markdown-d &>/tmp/imd.out &", a:initialMD)
 endfu
 
 function! s:initDict()
@@ -48,7 +49,14 @@ function! s:killDaemon()
 endfu
 
 function! s:bufGetContents(bufnr)
-  return join(getbufline(a:bufnr, 1, "$"), "\n")
+  let lines = getbufline(a:bufnr, 1, "$")
+  let currIndex = line(".") - 1  " line() returns 1-based index
+  let numLines = len(lines)
+  if currIndex >= 0 && currIndex < numLines
+    let cursor = "<a id='cursor'>^</a>"
+    let lines[currIndex] = lines[currIndex] . cursor
+  endif
+  return join(lines, "\n")
 endfu
 
 " I really, really hope there's a better way to do this.
